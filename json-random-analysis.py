@@ -1,7 +1,6 @@
 import json
 import os
 import random
-#该字典的key为属性值，每有一次value相同 则+1，没有一次value不同 则-1,0为节点
 total_dict = {}
 
 
@@ -14,20 +13,20 @@ def compare(a, b):
         if key in list(a.keys()) and key in list(b.keys()):
             if a[key] == b[key]:
                 print("%-40s | SAME"%(key))
-                total_dict[key] += 1
             else:
                 if type(a[key]) is dict:
                     compare(a[key], b[key])
                 else:
                     print("%-40s | DIFFERENT    \n     (A :"%(str(key)) + str(a[key]) + ")\n     (B: "+str(b[key])+")")
-                    total_dict[key] -= 1
+                    total_dict[key] += 1
 
         else:
             if key not in a.keys():
                 print("%-40s | DIFFERENT    \n     (A NOT EXIST"%(str(key)) + ")\n     (B: " + str(b[key])+")")
             else:
                 print("%-40s | DIFFERENT    \n     (A : "%(str(key)) + str(a[key])+")\n     (B NOT EXIST)")
-            total_dict[key] -= 1
+            total_dict[key] += 1
+
 
 
 def random_choose(path):
@@ -44,6 +43,8 @@ def random_choose(path):
 
 def integration(n):
     global total_dict
+    for key in total_dict:
+        total_dict[key] = n - total_dict[key]
     total_list = sorted(total_dict.items(), key=lambda x: x[1])
     for (key, value) in total_list:
         same_rate = int(value) / n

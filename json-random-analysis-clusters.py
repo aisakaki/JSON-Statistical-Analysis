@@ -1,18 +1,16 @@
+#黄
 import json
 import os
 import random
-#该字典的key为属性值，每有一次value相同 则+1，没有一次value不同 则-1,0为节点
+#计算每组的不同特征，避免联合特征不完全问题
 total_dict = {}
 
-
-#生成目标簇类比较的所有文件路径的列表
-#寻找path，从找到的第一个path开始，每找到一个path就加入一个列表中，直到找到第一个不满足条件的行
 def generate_path_list(clusters_file, class_no, cluster_no, class_path):
     path_list = []
     with open(clusters_file) as cf:
         for line in cf:
             line = line.split(',')
-            if line[0] == 'Id':
+            if line[0] == "Id":
                 continue
             if int(line[1]) == class_no and int(line[2].strip()) == cluster_no:
                 path_list.append(class_path+'/'+line[0])
@@ -28,20 +26,19 @@ def compare(a, b):
         if key in list(a.keys()) and key in list(b.keys()):
             if a[key] == b[key]:
                 print("%-40s | SAME"%(key))
-                total_dict[key] += 1
             else:
                 if type(a[key]) is dict:
                     compare(a[key], b[key])
                 else:
                     print("%-40s | DIFFERENT    \n     (A :"%(str(key)) + str(a[key]) + ")\n     (B: "+str(b[key])+")")
-                    total_dict[key] -= 1
+                    total_dict[key] += 1
 
         else:
             if key not in a.keys():
                 print("%-40s | DIFFERENT    \n     (A NOT EXIST"%(str(key)) + ")\n     (B: " + str(b[key])+")")
             else:
                 print("%-40s | DIFFERENT    \n     (A : "%(str(key)) + str(a[key])+")\n     (B NOT EXIST)")
-            total_dict[key] -= 1
+            total_dict[key] += 1
 
 
 def random_choose(path):
@@ -64,6 +61,8 @@ def random_choose_cluster(path_list):
 
 def integration(n):
     global total_dict
+    for key in total_dict:
+        total_dict[key] = n - total_dict[key]
     total_list = sorted(total_dict.items(), key=lambda x: x[1])
     for (key, value) in total_list:
         same_rate = int(value) / n
@@ -71,6 +70,7 @@ def integration(n):
 
 
 #APah 和 BPath为要抽样比较的两个文件夹的路径，N为抽样样本个数
+#用于按照家族分析特征
 def run_path(APath, BPath, N):
     global total_dict
     total_dict = {}
@@ -95,7 +95,8 @@ def run_path(APath, BPath, N):
     integration(N)
 
 
-#找到后队列表进行随机，取出随机到的那个APK后到家族目录去查找文件进行一次比较
+#clusters_file:聚类结果文件路径, class_no1：A的家族序号, cluster_no1：A的簇类序号, class_path：A特征家族的路径, class_no2：B的家族序号, cluster_no2：B的簇类序号, class_path：B特征家族的路径,N：抽样样本个数
+#用于按照聚类之后簇分析特征
 def run_clusters(clusters_file, class_no1, cluster_no1, class_path1, class_no2, cluster_no2, class_path2,N):
     global total_dict
     total_dict = {}
@@ -121,9 +122,5 @@ def run_clusters(clusters_file, class_no1, cluster_no1, class_path1, class_no2, 
     print('\n=============SIMILARITY=============')
     integration(N)
 
-
-#run_path('EXAMPLE', 'EXAMPLE', 3)
-
 #注意这里不需要/ 前面已经处理了
 run_clusters('cl.txt', 0, 1, 'EXAMPLE', 1, 2, 'EXAMPLE', 1)
-
