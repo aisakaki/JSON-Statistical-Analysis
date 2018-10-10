@@ -48,6 +48,8 @@ def add_list_to_num_dict(a, lis, dic, allFeatureList):
                     total_dict[item] = 0   #错误点
                 a[item] = 1
                 dic.append(item)
+            if item in dic and item in allFeatureList:
+                a[item] = 1
 
 
 def add_list_to_connection_map(lis, key):
